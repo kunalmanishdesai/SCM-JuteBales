@@ -1,66 +1,71 @@
 
 Steps:<br>
-    1) Go to network directory
 
-    2) Run ./scripts/networkUp.sh
+    1) Go to network directory <br><br>
 
-    3) To create channel transactions run ./scripts/createChannel OrgName channelName(mychannel)
+    2) Run ./scripts/networkUp.sh <br><br>
 
-    4) Start 4 terminals : Orderer,Manufacturer,Buyer,Inspector
+    3) To create channel transactions run ./scripts/createChannel channelName(mychannel)<br><br>
 
-    1] Orderer 
-        a) Your working terminal can be Orderer
-        b) Run command docker container orderer.example.com --follow
+    4) Start 4 terminals : Orderer,Manufacturer,Buyer,Inspector<br><br>
+
+    1] Orderer <br>
+        a) Your working terminal can be Orderer <br>
+        b) Run following command to check logs of orderer <br>
+            docker container logs orderer.example.com --follow <br><br>
     
-    2) Manufacturer
-        a) Run following commands(Setting environment variables for Manufacturer)
+    2) Manufacturer <br>
+        a) Run following commands(Setting environment variables for Manufacturer) <br><br>
+
+            export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem <br>
+            export PATH=$(pwd)/../bin:$PATH <br>
+            export FABRIC_CFG_PATH=$(pwd)/../config/ <br>
+            export CORE_PEER_TLS_ENABLED=true <br>
+            export CORE_PEER_LOCALMSPID="ManufacturerMSP" <br>
+            export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/manufacturer.example.com/peers/peer0.manufacturer.example.com/tls/ca.crt <br>
+            export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/manufacturer.example.com/users/Admin@manufacturer.example.com/msp <br>
+            export CORE_PEER_ADDRESS=localhost:7051 <br><br>
+
+        b) Creatting channel <br><br>
 
             export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
-            export PATH=$(pwd)/../bin:$PATH
-            export FABRIC_CFG_PATH=$(pwd)/../config/
-            export CORE_PEER_TLS_ENABLED=true
-            export CORE_PEER_LOCALMSPID="ManufacturerMSP"
-            export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/manufacturer.example.com/peers/peer0.manufacturer.example.com/tls/ca.crt
-            export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/manufacturer.example.com/users/Admin@manufacturer.example.com/msp
-            export CORE_PEER_ADDRESS=localhost:7051
+            
+            peer channel create -o localhost:7050 -c mychannel -f ./channel-artifacts/mychannel.tx --outputBlock ./channel-artifacts/mychannel.block --tls --cafile $ORDERER_CA <br><br>
 
-        b) Creatting channel 
+        c) Joining peer <br><br>
 
-            export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
-            peer channel create -o localhost:7050 -c mychannel -f ./channel-artifacts/mychannel.tx --outputBlock ./channel-artifacts/mychannel.block --tls --cafile $ORDERER_CA
+            peer channel join -b ./channel-artifacts/mychannel.block <br><br>
 
-        c) Joining peer
+    3) Buyer <br>
+        a)Run following commands(Setting environment variables for Buyer) <br><br>
 
-            peer channel join -b ./channel-artifacts/mychannel.block
-
-    3) Buyer
-        a)Run following commands(Setting environment variables for Buyer)
-
-            export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
-            export PATH=$(pwd)/../bin:$PATH
-            export FABRIC_CFG_PATH=$(pwd)/../config/
-            export CORE_PEER_TLS_ENABLED=true
-            export CORE_PEER_LOCALMSPID="BuyerMSP"
-            export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/buyer.example.com/peers/peer0.buyer.example.com/tls/ca.crt
-            export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/buyer.example.com/users/Admin@buyer.example.com/msp
-            export CORE_PEER_ADDRESS=localhost:9051
+            export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem <br>
+            export PATH=$(pwd)/../bin:$PATH <br>
+            export FABRIC_CFG_PATH=$(pwd)/../config/ <br>
+            export CORE_PEER_TLS_ENABLED=true <br>
+            export CORE_PEER_LOCALMSPID="BuyerMSP" <br>
+            export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/buyer.example.com/peers/peer0.buyer.example.com/tls/ca.crt <br>
+            export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/buyer.example.com/users/Admin@buyer.example.com/msp <br>
+            export CORE_PEER_ADDRESS=localhost:9051 <br><br>
         
-        b) Joining peer
+        b) Joining peer <br><br>
 
-            peer channel join -b ./channel-artifacts/mychannel.block
+            peer channel join -b ./channel-artifacts/mychannel.block <br><br>
     
-    4) Inspector
-        a)Run following commands(Setting environment variables for Inspector)
+    4) Inspector <br>
+        a)Run following commands(Setting environment variables for Inspector) <br><br>
 
-            export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
-            export PATH=$(pwd)/../bin:$PATH
-            export FABRIC_CFG_PATH=$(pwd)/../config/
-            export CORE_PEER_TLS_ENABLED=true
-            export CORE_PEER_LOCALMSPID="InspectorMSP"
-            export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/inspector.example.com/peers/peer0.inspector.example.com/tls/ca.crt
-            export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/inspector.example.com/users/Admin@inspector.example.com/msp
-            export CORE_PEER_ADDRESS=localhost:11051
+            export ORDERER_CA=$(pwd)/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem <br>
+            export PATH=$(pwd)/../bin:$PATH <br>
+            export FABRIC_CFG_PATH=$(pwd)/../config/ <br>
+            export CORE_PEER_TLS_ENABLED=true <br>
+            export CORE_PEER_LOCALMSPID="InspectorMSP" <br>
+            export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/inspector.example.com/peers/peer0.inspector.example.com/tls/ca.crt <br>
+            export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/inspector.example.com/users/Admin@inspector.example.com/msp <br>
+            export CORE_PEER_ADDRESS=localhost:11051 <br><br>
 
-        b) Joining peer
+        b) Joining peer <br><br>
 
-            peer channel join -b ./channel-artifacts/mychannel.block
+            peer channel join -b ./channel-artifacts/mychannel.block <br><br>
+
+Close the network ./scripts/networkDown.sh 
