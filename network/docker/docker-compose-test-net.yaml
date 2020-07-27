@@ -150,7 +150,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.inspector.example.com:11051
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.inspector.example.com:11051
-      - CORE_PEER_LOCALMSPID=inspectorMSP
+      - CORE_PEER_LOCALMSPID=InspectorMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../organizations/peerOrganizations/inspector.example.com/peers/peer0.inspector.example.com/msp:/etc/hyperledger/fabric/msp
