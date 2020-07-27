@@ -1,6 +1,8 @@
 
 Steps:<br><br>
 
+All the certificates are already generated.
+
     1) Go to network directory <br><br>
 
     2) Run ./scripts/networkUp.sh <br><br>
