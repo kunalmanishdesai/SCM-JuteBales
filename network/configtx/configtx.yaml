@@ -44,13 +44,13 @@ Organizations:
         OrdererEndpoints:
             - orderer.example.com:7050
 
-    - &Manufacturer
+    - &manufacturer
         # DefaultOrg defines the organization which is used in the sampleconfig
         # of the fabric.git development environment
-        Name: ManufacturerMSP
+        Name: manufacturerMSP
 
         # ID to load the MSP definition as
-        ID: ManufacturerMSP
+        ID: manufacturerMSP
 
         MSPDir: ../organizations/peerOrganizations/manufacturer.example.com/msp
 
@@ -60,16 +60,16 @@ Organizations:
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('ManufacturerMSP.admin', 'ManufacturerMSP.peer', 'ManufacturerMSP.client')"
+                Rule: "OR('manufacturerMSP.admin', 'manufacturerMSP.peer', 'manufacturerMSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('ManufacturerMSP.admin', 'ManufacturerMSP.client')"
+                Rule: "OR('manufacturerMSP.admin', 'manufacturerMSP.client')"
             Admins:
                 Type: Signature
-                Rule: "OR('ManufacturerMSP.admin')"
+                Rule: "OR('manufacturerMSP.admin')"
             Endorsement:
                 Type: Signature
-                Rule: "OR('ManufacturerMSP.peer')"
+                Rule: "OR('manufacturerMSP.peer')"
 
         # leave this flag set to true.
         AnchorPeers:
@@ -79,13 +79,13 @@ Organizations:
             - Host: peer0.manufacturer.example.com
               Port: 7051
 
-    - &Buyer
+    - &buyer
         # DefaultOrg defines the organization which is used in the sampleconfig
         # of the fabric.git development environment
-        Name: BuyerMSP
+        Name: buyerMSP
 
         # ID to load the MSP definition as
-        ID: BuyerMSP
+        ID: buyerMSP
 
         MSPDir: ../organizations/peerOrganizations/buyer.example.com/msp
 
@@ -95,16 +95,16 @@ Organizations:
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('BuyerMSP.admin', 'BuyerMSP.peer', 'BuyerMSP.client')"
+                Rule: "OR('buyerMSP.admin', 'buyerMSP.peer', 'buyerMSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('BuyerMSP.admin', 'BuyerMSP.client')"
+                Rule: "OR('buyerMSP.admin', 'buyerMSP.client')"
             Admins:
                 Type: Signature
-                Rule: "OR('BuyerMSP.admin')"
+                Rule: "OR('buyerMSP.admin')"
             Endorsement:
                 Type: Signature
-                Rule: "OR('BuyerMSP.peer')"
+                Rule: "OR('buyerMSP.peer')"
 
         AnchorPeers:
             # AnchorPeers defines the location of peers which can be used
@@ -113,13 +113,13 @@ Organizations:
             - Host: peer0.buyer.example.com
               Port: 9051
     
-    - &Inspector
+    - &inspector
         # DefaultOrg defines the organization which is used in the sampleconfig
         # of the fabric.git development environment
-        Name: InspectorMSP
+        Name: inspectorMSP
 
         # ID to load the MSP definition as
-        ID: InspectorMSP
+        ID: inspectorMSP
 
         MSPDir: ../organizations/peerOrganizations/inspector.example.com/msp
 
@@ -129,16 +129,16 @@ Organizations:
         Policies:
             Readers:
                 Type: Signature
-                Rule: "OR('InspectorMSP.admin', 'InspectorMSP.peer', 'InspectorMSP.client')"
+                Rule: "OR('inspectorMSP.admin', 'inspectorMSP.peer', 'inspectorMSP.client')"
             Writers:
                 Type: Signature
-                Rule: "OR('InspectorMSP.admin', 'InspectorMSP.client')"
+                Rule: "OR('inspectorMSP.admin', 'inspectorMSP.client')"
             Admins:
                 Type: Signature
-                Rule: "OR('InspectorMSP.admin')"
+                Rule: "OR('inspectorMSP.admin')"
             Endorsement:
                 Type: Signature
-                Rule: "OR('InspectorMSP.peer')"
+                Rule: "OR('inspectorMSP.peer')"
 
         AnchorPeers:
             # AnchorPeers defines the location of peers which can be used
@@ -353,17 +353,17 @@ Profiles:
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - *Manufacturer
-                    - *Buyer
-                    - *Inspector
+                    - *manufacturer
+                    - *buyer
+                    - *inspector
     ThreeOrgsChannel:
         Consortium: SampleConsortium
         <<: *ChannelDefaults
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - *Manufacturer
-                - *Buyer
-                - *Inspector
+                - *manufacturer
+                - *buyer
+                - *inspector
             Capabilities:
                 <<: *ApplicationCapabilities

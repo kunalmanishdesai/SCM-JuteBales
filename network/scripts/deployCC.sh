@@ -304,7 +304,7 @@ chaincodeInvokeInit() {
 	verifyResult $res "Invoke execution on $PEERS failed "
 	echo "===================== Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME' ===================== "
 	echo
-}
+}--peerAddresses ${CORE_PEER_ADDRESS_MANUFACTURER} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_MANUFACTURER} --peerAddresses ${CORE_PEER_ADDRESS_BUYER} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_BUYER} --peerAddresses ${CORE_PEER_ADDRESS_INSPECTOR} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_INSPECTOR}
 
 chaincodeQuery() {
 	ORG=$1
