@@ -21,28 +21,31 @@ Asset fields:
 
     As per National Agriculture Market.
 
-    Commodity Code: 16
-    Commodity Name: Jute Bales
-    Commodity Scientific Name: Conchorus spp.
 
-    Manufacture Date:
-    Manufacturer:
-    Owner:
-    Buying Date:
+    CreateBale
 
-    is_Verified :
-    Price :
+        Commodity Code: 16
+        Commodity Name: Jute Bales
+        Commodity Scientific Name: Conchorus spp.
 
-    //To be updated by Inspector
-    Inspected :
-    Total Score :
+        Manufacture Date:
+        Manufacturer:
+        Owner:
+        Buying Date:
+        status: Not Inspected/Inspected/Ready for Sale
 
-    Variety: Variety of jute
-    Actual Picture: Picture of Lot (convert to string and store)
-    
-    Reed Length:100-150
-    Strength: Range 1-5
-    Defects: Range 1-5
-    Root Content: Range 1-5
-    Fineness: Range 1-5
-    Colour: Range 1-5
+    Inspect Bale
+
+        //To be updated by Inspector
+        Inspected :
+        Total Score :
+
+        Variety: Variety of jute
+        Actual Picture: Picture of Lot (convert to string and store)
+        
+        Reed Length:100-150
+        Strength: Range 1-5
+        Defects: Range 1-5
+        Root Content: Range 1-5
+        Fineness: Range 1-5
+        Colour: Range 1-5

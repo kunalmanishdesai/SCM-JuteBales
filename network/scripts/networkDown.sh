@@ -6,8 +6,16 @@ rm -rf ./organizations/fabric-ca/buyer ./organizations/fabric-ca/*
 
 rm -rf ./channel-artifacts/ ./system-genesis-block/ fabcar.tar.gz
 
-pushd ../app
-    rm -rf app/buyer/javascript/wallet/* app/manufacturer/javascript/wallet/* app/inspector/javascript/wallet/*
+pushd ../app/buyer/javascript/wallet/
+    rm -rf *.id 
 popd 
+
+pushd ../app/manufacturer/javascript/wallet/
+    rm -rf *.id  
+popd 
+
+pushd ../app/inspector/javascript/wallet/
+    rm -rf *.id  
+popd
 
 cp -ar ./organizations/backup/. ./organizations/fabric-ca/

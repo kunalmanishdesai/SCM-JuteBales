@@ -1,12 +1,15 @@
-CC_SRC_PATH="../fabcar/javascript"
-CC_NAME="fabcar"
-CC_RUNTIME_LANGUAGE="node"
-CC_VERSION="1"
-INIT_REQUIRED="--init-required"
-CC_INIT_FCN="initLedger"
-CC_COLL_CONFIG=""
+CC_SRC_PATH="../fabjute/"
+CC_NAME="fabjute"
+CC_RUNTIME_LANGUAGE="golang"
+CC_VERSION="2"
+# INIT_REQUIRED="--init-required"
+# CC_INIT_FCN="initLedger"
+INIT_REQUIRED=""
+CC_INIT_FCN=""
+
+CC_COLL_CONFIG="--collections-config ../fabjute/collections_config.json"
 CC_END_POLICY=""
-CC_SEQUENCE="1"
+CC_SEQUENCE="2"
 DELAY="3"
 CHANNEL_NAME="mychannel"
 
@@ -21,8 +24,7 @@ CORE_PEER_TLS_ROOTCERT_FILE_INSPECTOR=$(pwd)/organizations/peerOrganizations/ins
 
 installDependencies(){
     pushd $CC_SRC_PATH
-        npm install
-        # npm run build
+        GO111MODULE=on go mod vendor
     popd
 }
 
@@ -60,10 +62,30 @@ queryCommitted() {
 }
 
 chaincodeInvokeInit(){
-    fcn_call='{"function":"'${CC_INIT_FCN}'","Args":[]}'
-    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses ${CORE_PEER_ADDRESS_MANUFACTURER} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_MANUFACTURER} --peerAddresses ${CORE_PEER_ADDRESS_BUYER} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_BUYER} --peerAddresses ${CORE_PEER_ADDRESS_INSPECTOR} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_INSPECTOR} --isInit -c ${fcn_call} 
+    fcn_call='{"Args":["createAsset","Bale1"]}'
+    peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n ${CC_NAME} --peerAddresses ${CORE_PEER_ADDRESS_MANUFACTURER} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_MANUFACTURER} --peerAddresses ${CORE_PEER_ADDRESS_BUYER} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_BUYER} --peerAddresses ${CORE_PEER_ADDRESS_INSPECTOR} --tlsRootCertFiles ${CORE_PEER_TLS_ROOTCERT_FILE_INSPECTOR} -c ${fcn_call} 
 }
 
 chaincodeQuery() {
-    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["queryAllCars"]}'
+    peer chaincode query -C $CHANNEL_NAME -n ${CC_NAME} -c '{"Args":["ReadAsset","Bale1"]}'
+}
+
+manufacturerFunc(){
+    installDependencies
+    packageChaincode
+    installChaincode
+    queryInstalled
+    approveForMyOrg
+}
+
+buyerFunc(){
+    installChaincode
+    queryInstalled
+    approveForMyOrg
+}
+
+inspectorFunc(){
+    installChaincode
+    queryInstalled
+    approveForMyOrg
 }

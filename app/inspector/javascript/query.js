@@ -14,7 +14,7 @@ const fs = require('fs');
 async function main() {
     try {
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '..', '..', 'network', 'organizations', 'peerOrganizations', 'inspector.example.com', 'connection-inspector.json');
+        const ccpPath = path.resolve(__dirname, '..','..', '..', 'network', 'organizations', 'peerOrganizations', 'inspector.example.com', 'connection-inspector.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new file system based wallet for managing identities.
@@ -38,13 +38,15 @@ async function main() {
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = network.getContract('fabcar');
+        const contract = network.getContract('fabjute');
 
-        // Evaluate the specified transaction.
-        // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
-        // queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
-        const result = await contract.evaluateTransaction('queryAllCars');
-        console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        var result = await contract.evaluateTransaction('ReadAsset','Bale7');
+        // var result = await contract.evaluateTransaction('QueryAssetHistory','Bale7');
+        
+        result = result.toString();
+
+        result = JSON.parse(result)
+        console.log(JSON.stringify(result,null,'\t'));
 
         // Disconnect from the gateway.
         await gateway.disconnect();

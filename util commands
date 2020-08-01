@@ -1,8 +1,6 @@
 cd network/ && clear
 
-./scripts/networkUp.sh
-
-sudo chmod -R 777 .
+./scripts/networkUp.sh && sudo chmod -R 777 .
 
 source ./scripts/setEnvar.sh
 

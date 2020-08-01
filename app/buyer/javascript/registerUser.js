@@ -14,7 +14,7 @@ const path = require('path');
 async function main() {
     try {
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '..', '..', 'network', 'organizations', 'peerOrganizations', 'buyer.example.com', 'connection-buyer.json');
+        const ccpPath = path.resolve(__dirname, '..','..', '..', 'network', 'organizations', 'peerOrganizations', 'buyer.example.com', 'connection-buyer.json');
         const ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new CA client for interacting with the CA.

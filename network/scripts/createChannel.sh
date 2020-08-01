@@ -21,7 +21,7 @@ createChannelTx() {
 
 createAncorPeerTx() {
 
-	for orgmsp in ManufacturerMSP BuyerMSP InspectorMSP; do
+	for orgmsp in manufacturerMSP buyerMSP inspectorMSP; do
 
 	echo "#######    Generating anchor peer update transaction for ${orgmsp}  ##########"
 	set -x

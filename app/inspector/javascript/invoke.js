@@ -13,7 +13,7 @@ const path = require('path');
 async function main() {
     try {
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '..', '..', 'network', 'organizations', 'peerOrganizations', 'inspector.example.com', 'connection-inspector.json');
+        const ccpPath = path.resolve(__dirname, '..','..', '..', 'network', 'organizations', 'peerOrganizations', 'inspector.example.com', 'connection-inspector.json');
         let ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new file system based wallet for managing identities.
@@ -37,13 +37,33 @@ async function main() {
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = network.getContract('fabcar');
+        const contract = network.getContract('fabjute');
 
-        // Submit the specified transaction.
-        // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
-        // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR12', 'Dave')
-        await contract.submitTransaction('createCar', 'CAR800', 'Honda', 'Accord', 'Black', 'Tom');
-        console.log('Transaction has been submitted');
+        //receiveAsset
+
+        let transactionObject = contract.createTransaction('ReceiveAsset');
+        transactionObject.setTransient({deliveryId:"1234MANINSBale21"});
+        await transactionObject.submit("Bale21")
+        console.log('Asset Recieved');
+
+        //inspectAsset
+
+        // await contract.submitTransaction('inspectAsset', 'Bale21','7/10','VarA','150mm','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5');
+        // console.log('Transaction has been submitted');
+
+        //send Asset
+
+        // let transactionObject = contract.createTransaction('SendAsset');
+        // transactionObject.setTransient({deliveryId:"123INSMANBale21"});
+        // await transactionObject.submit("Bale21")
+        // console.log('Asset Dispatched');
+
+        //transferResponsibility to inspectorMSP
+
+        // await contract.submitTransaction('TransferResponsibility','Bale21','manufacturerMSP');
+        // console.log('Asset Transfered');
+
+
 
         // Disconnect from the gateway.
         await gateway.disconnect();

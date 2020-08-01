@@ -13,7 +13,7 @@ const path = require('path');
 async function main() {
     try {
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '..', '..', 'network', 'organizations', 'peerOrganizations', 'manufacturer.example.com', 'connection-manufacturer.json');
+        const ccpPath = path.resolve(__dirname,'..','..', '..', 'network', 'organizations', 'peerOrganizations', 'manufacturer.example.com', 'connection-manufacturer.json');
         let ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new file system based wallet for managing identities.
@@ -37,13 +37,45 @@ async function main() {
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = network.getContract('fabcar');
+        const contract = network.getContract('fabjute');
+        
+        //create asset
+        
+        // await contract.submitTransaction('createAsset', 'Bale21');
+        // console.log('Bale has been created');
 
-        // Submit the specified transaction.
-        // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
-        // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR12', 'Dave')
-        await contract.submitTransaction('createCar', 'CAR800', 'Honda', 'Accord', 'Black', 'Tom');
-        console.log('Transaction has been submitted');
+        //sendAsset
+
+        // let transactionObject = contract.createTransaction('SendAsset');
+        // transactionObject.setTransient({deliveryId:"123MANINSBale21"});
+        // await transactionObject.submit("Bale21")
+        // console.log('Asset Dispatched');
+
+        //transferResponsibility to inspectorMSP
+
+        // await contract.submitTransaction('TransferResponsibility','Bale21','inspectorMSP');
+        // console.log('Asset Responsibility Transfered');
+
+        // receiveAsset
+
+        // let transactionObject = contract.createTransaction('ReceiveAsset');
+        // transactionObject.setTransient({deliveryId:"123INSMANBale21"});
+        // await transactionObject.submit("Bale21")
+        // console.log('Asset Recieved');
+
+        // send Asset to buyer
+
+        // let transactionObject = contract.createTransaction('SendAsset');
+        // transactionObject.setTransient({deliveryId:"123MANBUYBale21"});
+        // await transactionObject.submit("Bale21")
+        // console.log('Asset Dispatched');
+        
+
+        //transferAsset to buyerMSP
+
+        //await contract.submitTransaction('transferAsset','Bale21','buyerMSP');
+        //console.log('Asset Transfered');
+
 
         // Disconnect from the gateway.
         await gateway.disconnect();
