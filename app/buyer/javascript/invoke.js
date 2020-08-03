@@ -4,16 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-'use strict';
+const express = require('express');
+const app = express();
+
+app.use(express.static('public'))
+app.set('view engine','pug');
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const { Gateway, Wallets } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
 
-async function main() {
+var gateway;
+var contract;
+
+async function createGateway() {
     try {
         // load the network configuration
-        const ccpPath = path.resolve(__dirname, '..','..', '..', 'network', 'organizations', 'peerOrganizations', 'buyer.example.com', 'connection-buyer.json');
+        const ccpPath = path.resolve(__dirname,'..','..', '..', 'network', 'organizations', 'peerOrganizations', 'buyer.example.com', 'connection-buyer.json');
         let ccp = JSON.parse(fs.readFileSync(ccpPath, 'utf8'));
 
         // Create a new file system based wallet for managing identities.
@@ -30,28 +41,78 @@ async function main() {
         }
 
         // Create a new gateway for connecting to our peer node.
-        const gateway = new Gateway();
+        gateway = new Gateway();
         await gateway.connect(ccp, { wallet, identity: 'appUser', discovery: { enabled: true, asLocalhost: true } });
 
-        // Get the network (channel) our contract is deployed to.
+        // Get the network (channel) or contract is deployed to.
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = network.getContract('fabjute');
-
-        //receive Asset
-        // let transactionObject = contract.createTransaction('ReceiveAsset');
-        // transactionObject.setTransient({deliveryId:"123MANBUYBale21"});
-        // await transactionObject.submit("Bale21")
-        // console.log('Asset Recieved');
-
-        // Disconnect from the gateway.
-        await gateway.disconnect();
-
-    } catch (error) {
+        contract = network.getContract('fabjute');
+              
+        //console.log('Asset Transfered');
+      } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
     }
 }
 
-main();
+
+
+app.get('/', async function(req,res){
+
+  await createGateway();
+
+  result = await contract.evaluateTransaction("QueryAllAssets");
+  result = result.toString();
+  result = JSON.parse(result);
+  // console.log(result);
+
+
+  jsonArray = result;
+  res.render("dashboard.pug",{
+    jsonArray:jsonArray
+  });
+
+  await gateway.disconnect();
+
+});
+
+app.get('/getAssetHistory/:id',async function (req,res){
+  await createGateway();
+
+  result = await contract.submitTransaction("QueryAssetHistory",req.params.id);
+  result = result.toString();
+  result = JSON.parse(result);
+  // console.log(result);
+
+  jsonArray = result;
+  res.render("assetHistory.pug",{
+    jsonArray:jsonArray
+  });
+
+  await gateway.disconnect();
+
+});
+
+app.post('/buy',async function(req,res){
+  await createGateway();
+
+  await contract.submitTransaction("BuyAsset",req.body.key);
+  res.redirect("/");
+
+  await gateway.disconnect();
+});
+
+app.post('/AssetRecieved',async function(req,res){
+
+  await createGateway();
+
+  await contract.submitTransaction("AssetReceived",req.body.key);
+  res.redirect("/");
+
+  await gateway.disconnect();
+});
+
+app.listen(process.env.port || 3001);
+console.log('Web Server is listening at port '+ (process.env.port || 3001));

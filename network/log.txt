@@ -1,3 +1,2 @@
 Installed chaincodes on peer:
-Package ID: fabjute_1:31cc15a9bfba418a0d9befbd40d685053d595184e234697e33f42751cbb974bd, Label: fabjute_1
-Package ID: fabjute_2:d7cc8fc58da7a60f62aa1a8b62911ec4fd145758b201bdb59acece2e79623931, Label: fabjute_2
+Package ID: fabjute_1:c54ba185dcf92c0efc8abe2989c2fe2413e547538ae90fb46f9ccb62c56db865, Label: fabjute_1

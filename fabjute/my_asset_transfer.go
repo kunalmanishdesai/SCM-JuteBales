@@ -1,52 +1,102 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
 type Asset struct {
-	Name           string `json:"assetName"`
-	Code           string `json:"assetCode"`
-	ID             string `json:"assetID"`
-	Owner          string `json:"owner"`
-	Manufacturer   string `json:"manufacturer"`
-	Status         string `json:"status"`
-	Responsibility string `json:"responsibility"`
-	Inspector      string `json:"inspector"`
-	TotalScore     string `json:"totalScore"`
-	Variety        string `json:"variety"`
-	ReedLength     string `json:"reedLength"`
-	Strength       string `json:"strength"`
-	Defects        string `json:"defects"`
-	RootContent    string `json:"rootContent"`
-	Fineness       string `json:"fineness"`
-	Colour         string `json:"colour"`
+	AssetNumber  string `json:"assetnumber"`
+	AssetId      string `json:"assetid"`
+	Manufacturer string `json:"manufacturer"`
+	Owner        string `json:"owner"`
+	Status       string `json:"status"`
+	Handler      string `json:"handler"`
+	Buyer        string `json:"buyer"`
+
+	Location     string `json:"location"`
+	Inspector    string `json:"inspector"`
+	Description  string `json:"description"`
+	GAW          string `json:"gaw"`
+	Weft         string `json:"weft"`
+	Cut          string `json:"cut"`
+	MajorDefects string `json:"majordefects"`
+	MinorDefects string `json:"minordefects`
 }
 
 type SmartContract struct {
 	contractapi.Contract
 }
 
-func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, assetID string) error {
+func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
 		return fmt.Errorf("failed to get verified OrgID: %v", err)
 	}
+
+	for i := 0; i < 10; i++ {
+		var assetId = createAssetId(strconv.Itoa(i), clientMSPID)
+
+		asset := Asset{
+			AssetNumber:  strconv.Itoa(i),
+			AssetId:      assetId,
+			Manufacturer: clientMSPID,
+			Owner:        clientMSPID,
+			Status:       "Sale",
+			Handler:      "None",
+			Buyer:        "None",
+			Location:     "Delhi",
+			Inspector:    "Inspector",
+			Description:  "Ipsem Lorem",
+			GAW:          "0.7",
+			Weft:         "Two or More",
+			Cut:          "Many",
+			MajorDefects: "5",
+			MinorDefects: "9",
+		}
+
+		assetAsBytes, _ := json.Marshal(asset)
+		err := ctx.GetStub().PutState(asset.AssetId, assetAsBytes)
+
+		if err != nil {
+			return fmt.Errorf("Failed to put to world state. %s,asset number %s", err.Error(), i)
+		}
+	}
+
+	return nil
+}
+
+func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, assetNumber string, description string, gaw string, weft string,
+	cut string, majorDefects string, minorDefects string) error {
+	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return fmt.Errorf("failed to get verified OrgID: %v", err)
+	}
+
+	var assetID = createAssetId(assetNumber, clientMSPID)
 
 	// Creating asset Asset
 	asset := Asset{
-		Name:           "Jute",
-		Code:           "16",
-		ID:             assetID,
-		Owner:          clientMSPID,
-		Manufacturer:   clientMSPID,
-		Status:         "Not Inspected",
-		Responsibility: clientMSPID,
+		AssetNumber:  assetNumber,
+		AssetId:      assetID,
+		Manufacturer: clientMSPID,
+		Owner:        clientMSPID,
+		Status:       "Sale",
+		Handler:      "None",
+		Buyer:        "None",
+		Location:     "Delhi",
+		Inspector:    "Inspector",
+		Description:  description,
+		GAW:          gaw,
+		Weft:         weft,
+		Cut:          cut,
+		MajorDefects: majorDefects,
+		MinorDefects: minorDefects,
 	}
 
 	//converting to bytes
@@ -55,7 +105,7 @@ func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface,
 		return fmt.Errorf("failed to create asset JSON: %v", err)
 	}
 
-	err = ctx.GetStub().PutState(asset.ID, assetBytes)
+	err = ctx.GetStub().PutState(asset.AssetId, assetBytes)
 	if err != nil {
 		return fmt.Errorf("failed to put asset in public data: %v", err)
 	}
@@ -63,154 +113,70 @@ func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface,
 	return nil
 }
 
-func (s *SmartContract) SendAsset(ctx contractapi.TransactionContextInterface, assetID string) error {
+func (s *SmartContract) TakeAStop(ctx contractapi.TransactionContextInterface, assetID string, location string, handler string, status string) error {
 
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return fmt.Errorf("failed to get verified OrgID: %v", err)
-	}
-
-	transientMap, err := ctx.GetStub().GetTransient()
-	if err != nil {
-		return fmt.Errorf("error getting transient: %v", err)
-	}
-	// Asset properties must be retrieved from the transient field as they are private
-	transientdeliveryId, ok := transientMap["deliveryId"]
-	if !ok {
-		return fmt.Errorf("deliveryId key not found in the transient map")
-	}
-
-	collection := clientMSPID + "PrivateCollection"
-	err = ctx.GetStub().PutPrivateData(collection, assetID, transientdeliveryId)
-	if err != nil {
-		return fmt.Errorf("failed to put Asset private details: %v", err)
-	}
-	return nil
-}
-
-func (s *SmartContract) ReceiveAsset(ctx contractapi.TransactionContextInterface, assetID string) error {
-	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return fmt.Errorf("failed to get verified OrgID: %v", err)
-	}
-
-	transientMap, err := ctx.GetStub().GetTransient()
-	if err != nil {
-		return fmt.Errorf("error getting transient: %v", err)
-	}
-	// Asset properties must be retrieved from the transient field as they are private
-	transientdeliveryId, ok := transientMap["deliveryId"]
-	if !ok {
-		return fmt.Errorf("deliveryId key not found in the transient map")
-	}
-
-	collection := clientMSPID + "PrivateCollection"
-	err = ctx.GetStub().PutPrivateData(collection, assetID, transientdeliveryId)
-	if err != nil {
-		return fmt.Errorf("failed to put Asset private details: %v", err)
-	}
-	return nil
-}
-
-func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, assetID string, buyerOrgID string) error {
-	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return fmt.Errorf("failed to get verified OrgID: %v", err)
-	}
 
 	asset, err := s.ReadAsset(ctx, assetID)
 	if err != nil {
-		return fmt.Errorf("failed to get asset: %v", err)
+		return fmt.Errorf("Asset not found")
 	}
 
 	if asset.Owner != clientMSPID {
-		return fmt.Errorf("a client from %s cannot transfer a asset owned by %s", clientMSPID, asset.Owner)
+		return fmt.Errorf("Owner mismatch")
 	}
 
-	err = verifyTransferConditions(ctx, assetID, clientMSPID, buyerOrgID)
-	if err != nil {
-		return fmt.Errorf("failed transfer verification: %v", err)
+	handlerprevious := ""
+	if status != "ok" {
+		handlerprevious = asset.Handler
+		asset.Status = "Damaged"
 	}
 
-	err = transferAssetState(ctx, asset, clientMSPID, buyerOrgID)
-	if err != nil {
-		return fmt.Errorf("failed asset transfer: %v", err)
-	}
+	asset.Handler = handler
+	asset.Location = location
 
-	return nil
-}
-
-func (s *SmartContract) TransferResponsibility(ctx contractapi.TransactionContextInterface, assetID string, buyerOrgID string) error {
-	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return fmt.Errorf("failed to get verified OrgID: %v", err)
-	}
-
-	asset, err := s.ReadAsset(ctx, assetID)
-	if err != nil {
-		return fmt.Errorf("failed to get asset: %v", err)
-	}
-
-	if asset.Responsibility != clientMSPID {
-		return fmt.Errorf("%s holds responsibility of the asset owned by %s", asset.Responsibility)
-	}
-
-	err = verifyTransferConditions(ctx, asset.ID, clientMSPID, buyerOrgID)
-	if err != nil {
-		return fmt.Errorf("failed transfer verification: %v", err)
-	}
-
-	err = transferAssetResposibilityState(ctx, asset, clientMSPID, buyerOrgID)
-	if err != nil {
-		return fmt.Errorf("failed asset transfer responsibility : %v", err)
-	}
-
-	return nil
-}
-
-func (s *SmartContract) InspectAsset(ctx contractapi.TransactionContextInterface,
-	assetID string,
-	totalScore string,
-	variety string,
-	reedLength string,
-	strength string,
-	defects string,
-	rootContent string,
-	fineness string,
-	colour string) error {
-
-	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
-	if err != nil {
-		return fmt.Errorf("failed to get verified OrgID: %v", err)
-	}
-
-	asset, err := s.ReadAsset(ctx, assetID)
-	if err != nil {
-		return fmt.Errorf("failed to get asset: %v", err)
-	}
-
-	if asset.Responsibility != clientMSPID {
-		return fmt.Errorf("You cant inspect this asset as you dont have responsibility")
-	}
-
-	// Creating asset Asset
-
-	asset.TotalScore = totalScore
-	asset.Variety = variety
-	asset.ReedLength = reedLength
-	asset.Strength = strength
-	asset.Defects = defects
-	asset.RootContent = rootContent
-	asset.Fineness = fineness
-	asset.Colour = colour
-
-	//converting to bytes
 	assetBytes, err := json.Marshal(asset)
 	if err != nil {
 		return fmt.Errorf("failed to create asset JSON: %v", err)
 	}
 
-	err = ctx.GetStub().PutState(asset.ID, assetBytes)
+	err = ctx.GetStub().PutState(asset.AssetId, assetBytes)
+	if err != nil {
+		return fmt.Errorf("failed to put asset in public data: %v", err)
+	}
+
+	if asset.Status == "Damaged" {
+		return fmt.Errorf("Asset has been damaged by party %s Call back asset", handlerprevious)
+	}
+
+	return nil
+}
+
+func (s *SmartContract) AssetReceived(ctx contractapi.TransactionContextInterface, assetID string) error {
+
+	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return fmt.Errorf("Get Buyer ID")
+	}
+
+	asset, err := s.ReadAsset(ctx, assetID)
+	if err != nil {
+		return fmt.Errorf("Asset not found")
+	}
+
+	if asset.Buyer != clientMSPID {
+		return fmt.Errorf("Wrong buyer")
+	}
+
+	asset.Owner = asset.Buyer
+	asset.Buyer = "None"
+
+	assetBytes, err := json.Marshal(asset)
+	if err != nil {
+		return fmt.Errorf("failed to create asset JSON: %v", err)
+	}
+
+	err = ctx.GetStub().PutState(asset.AssetId, assetBytes)
 	if err != nil {
 		return fmt.Errorf("failed to put asset in public data: %v", err)
 	}
@@ -218,85 +184,41 @@ func (s *SmartContract) InspectAsset(ctx contractapi.TransactionContextInterface
 	return nil
 }
 
-func verifyTransferConditions(ctx contractapi.TransactionContextInterface,
-	assetID string,
-	clientMSPID string,
-	buyerOrgID string) error {
+func (s *SmartContract) BuyAsset(ctx contractapi.TransactionContextInterface, assetID string) error {
 
-	collectionSender := clientMSPID + "PrivateCollection"
-	collectionReceiver := buyerOrgID + "PrivateCollection"
-
-	immutableHash, err := ctx.GetStub().GetPrivateDataHash(collectionReceiver, assetID)
+	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {
-		return fmt.Errorf("failed to read asset private properties hash from receiver's collection: %v", err)
-	}
-	if immutableHash == nil {
-		return fmt.Errorf("asset private properties hash does not exist: %s", assetID)
+		return fmt.Errorf("Cant get Buyer ID")
 	}
 
-	myHash, err := ctx.GetStub().GetPrivateDataHash(collectionSender, assetID)
+	asset, err := s.ReadAsset(ctx, assetID)
 	if err != nil {
-		return fmt.Errorf("failed to read asset private properties hash from sender's collection: %s %v", assetID, err)
+		return fmt.Errorf("Asset not found")
 	}
 
-	if !bytes.Equal(immutableHash, myHash) {
-		return fmt.Errorf("hash %x for passed immutable properties does not match on-chain hash %x",
-			myHash,
-			immutableHash,
-		)
+	if asset.Status != "Sale" {
+		return fmt.Errorf("Asset not for sale")
+	}
+
+	asset.Status = "ok"
+	asset.Buyer = clientMSPID
+
+	assetBytes, err := json.Marshal(asset)
+	if err != nil {
+		return fmt.Errorf("failed to create asset JSON: %v", err)
+	}
+
+	err = ctx.GetStub().PutState(asset.AssetId, assetBytes)
+	if err != nil {
+		return fmt.Errorf("failed to put asset in public data: %v", err)
 	}
 
 	return nil
 }
 
-func transferAssetState(ctx contractapi.TransactionContextInterface,
-	asset *Asset,
-	clientMSPID string,
-	buyerOrgID string) error {
-
-	asset.Owner = buyerOrgID
-	updatedAsset, err := json.Marshal(asset)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.GetStub().PutState(asset.ID, updatedAsset)
-	if err != nil {
-		return fmt.Errorf("failed to write asset for buyer: %v", err)
-	}
-
-	collectionSender := clientMSPID + "PrivateCollection"
-	err = ctx.GetStub().DelPrivateData(collectionSender, asset.ID)
-	if err != nil {
-		return fmt.Errorf("failed to delete Asset private details from seller: %v", err)
-	}
-
-	return nil
-}
-
-func transferAssetResposibilityState(ctx contractapi.TransactionContextInterface,
-	asset *Asset,
-	clientMSPID string,
-	buyerOrgID string) error {
-
-	asset.Responsibility = buyerOrgID
-	updatedAsset, err := json.Marshal(asset)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.GetStub().PutState(asset.ID, updatedAsset)
-	if err != nil {
-		return fmt.Errorf("failed to write asset for buyer: %v", err)
-	}
-
-	collectionSender := clientMSPID + "PrivateCollection"
-	err = ctx.GetStub().DelPrivateData(collectionSender, asset.ID)
-	if err != nil {
-		return fmt.Errorf("failed to delete Asset private details from seller: %v", err)
-	}
-
-	return nil
+func createAssetId(assetNumber string, clientMSPID string) string {
+	assetId := "Asset-" + clientMSPID + assetNumber
+	return (assetId)
 }
 
 func main() {

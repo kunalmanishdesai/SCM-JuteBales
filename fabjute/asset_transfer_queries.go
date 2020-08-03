@@ -21,7 +21,7 @@ type QueryResult struct {
 }
 
 type QueryResult1 struct {
-	Key    string
+	Key    string `json:"key"`
 	Record *Asset
 }
 
@@ -80,7 +80,7 @@ func (s *SmartContract) QueryAssetHistory(ctx contractapi.TransactionContextInte
 	return results, nil
 }
 
-func (s *SmartContract) QueryAllassets(ctx contractapi.TransactionContextInterface) ([]QueryResult1, error) {
+func (s *SmartContract) QueryAllAssets(ctx contractapi.TransactionContextInterface) ([]QueryResult1, error) {
 	startKey := ""
 	endKey := ""
 
@@ -108,7 +108,6 @@ func (s *SmartContract) QueryAllassets(ctx contractapi.TransactionContextInterfa
 
 		results = append(results, record)
 	}
-
 	return results, nil
 
 }

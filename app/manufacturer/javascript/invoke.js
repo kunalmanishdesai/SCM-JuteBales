@@ -4,13 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-'use strict';
+const express = require('express');
+const app = express();
+
+app.use(express.static('public'))
+app.set('view engine','pug');
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 const { Gateway, Wallets } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
 
-async function main() {
+var gateway;
+var contract;
+
+async function createGateway() {
     try {
         // load the network configuration
         const ccpPath = path.resolve(__dirname,'..','..', '..', 'network', 'organizations', 'peerOrganizations', 'manufacturer.example.com', 'connection-manufacturer.json');
@@ -30,60 +41,81 @@ async function main() {
         }
 
         // Create a new gateway for connecting to our peer node.
-        const gateway = new Gateway();
+        gateway = new Gateway();
         await gateway.connect(ccp, { wallet, identity: 'appUser', discovery: { enabled: true, asLocalhost: true } });
 
         // Get the network (channel) our contract is deployed to.
         const network = await gateway.getNetwork('mychannel');
 
         // Get the contract from the network.
-        const contract = network.getContract('fabjute');
-        
-        //create asset
-        
-        // await contract.submitTransaction('createAsset', 'Bale21');
-        // console.log('Bale has been created');
-
-        //sendAsset
-
-        // let transactionObject = contract.createTransaction('SendAsset');
-        // transactionObject.setTransient({deliveryId:"123MANINSBale21"});
-        // await transactionObject.submit("Bale21")
-        // console.log('Asset Dispatched');
-
-        //transferResponsibility to inspectorMSP
-
-        // await contract.submitTransaction('TransferResponsibility','Bale21','inspectorMSP');
-        // console.log('Asset Responsibility Transfered');
-
-        // receiveAsset
-
-        // let transactionObject = contract.createTransaction('ReceiveAsset');
-        // transactionObject.setTransient({deliveryId:"123INSMANBale21"});
-        // await transactionObject.submit("Bale21")
-        // console.log('Asset Recieved');
-
-        // send Asset to buyer
-
-        // let transactionObject = contract.createTransaction('SendAsset');
-        // transactionObject.setTransient({deliveryId:"123MANBUYBale21"});
-        // await transactionObject.submit("Bale21")
-        // console.log('Asset Dispatched');
-        
-
-        //transferAsset to buyerMSP
-
-        //await contract.submitTransaction('transferAsset','Bale21','buyerMSP');
+        contract = network.getContract('fabjute');
+              
+        //await contract.submitTransaction("createAsset","123");
         //console.log('Asset Transfered');
-
-
-        // Disconnect from the gateway.
-        await gateway.disconnect();
-
-    } catch (error) {
+      } catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
     }
 }
 
-main();
+
+
+app.get('/', async function(req,res){
+
+  await createGateway();
+
+  result = await contract.evaluateTransaction("QueryAllAssets");
+  result = result.toString();
+  result = JSON.parse(result);
+
+
+  jsonArray = result;
+  res.render("dashboard.pug",{
+    jsonArray:jsonArray
+  });
+
+  await gateway.disconnect();
+
+});
+
+app.get('/getAssetHistory/:id',async function (req,res){
+    await createGateway();
+  
+    result = await contract.submitTransaction("QueryAssetHistory",req.params.id);
+    result = result.toString();
+    result = JSON.parse(result);
+    // console.log(result);
+  
+    jsonArray = result;
+    res.render("assetHistory.pug",{
+      jsonArray:jsonArray
+    });
+  
+    await gateway.disconnect();
+  
+  });
+
+app.post('/createAsset',async function(req,res){
+
+  await createGateway();
+
+  console.log(req.body.assetid);
+  await contract.submitTransaction("createAsset",req.body.assetid,req.body.description,req.body.gaw,req.body.weft,req.body.cut,req.body.majordefects,req.body.minordefects);
+  res.redirect("/");
+
+  await gateway.disconnect();
+});
+
+app.post('/takeStop',async function(req,res){
+
+  console.log("Hello");
+  await createGateway();
+    
+  await contract.submitTransaction("takeAStop",req.body.key,req.body.location,req.body.handler,req.body.status);
+  res.redirect("/");
+
+  await gateway.disconnect();
+});
+
+app.listen(process.env.port || 3000);
+console.log('Web Server is listening at port '+ (process.env.port || 3000));

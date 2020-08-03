@@ -6,9 +6,13 @@
 
 'use strict';
 
+var http = require('http');
+var url = require('url');
+
 const { Gateway, Wallets } = require('fabric-network');
 const path = require('path');
 const fs = require('fs');
+const { mainModule } = require('process');
 
 
 async function main() {
@@ -44,8 +48,8 @@ async function main() {
         // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
         // queryAllCars transaction - requires no arguments, ex: ('queryAllCars')
         
-        var result = await contract.evaluateTransaction('ReadAsset','Bale7');
-        // var result = await contract.evaluateTransaction('QueryAssetHistory','Bale7');
+        //var result = await contract.evaluateTransaction('ReadAsset','Bale1');
+        var result = await contract.evaluateTransaction('QueryAllAssets');
         
         result = result.toString();
 
@@ -61,4 +65,4 @@ async function main() {
     }
 }
 
-main();
+main()
